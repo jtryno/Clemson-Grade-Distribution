@@ -1,121 +1,99 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import { useState } from 'react';
+import { useGradeData, type SortOption } from './hooks/useGradeData';
+import { CourseGroup } from './components/CourseGroup';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [query, setQuery] = useState('');
+  const [dept, setDept] = useState('');
+  const [sort, setSort] = useState<SortOption>('course');
+
+  const { groups, allDepts, label } = useGradeData(query, dept, sort);
+
+  const hasSearch = query.trim() !== '' || dept !== '';
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <header className="bg-clemson-orange text-white px-4 py-5 shadow">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Clemson Grade Distribution
+          </h1>
+          <p className="text-orange-100 text-sm mt-0.5">{label}</p>
         </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+      </header>
 
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
+      {/* Controls */}
+      <div className="sticky top-0 z-10 bg-white border-b border-gray-200 shadow-sm px-4 py-3">
+        <div className="max-w-3xl mx-auto flex flex-col gap-2">
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by course (e.g. CPSC 2120), title, or instructor..."
+            className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-clemson-orange focus:border-transparent"
+          />
+          <div className="flex gap-2">
+            <select
+              value={dept}
+              onChange={(e) => setDept(e.target.value)}
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clemson-orange bg-white"
+            >
+              <option value="">All Departments</option>
+              {allDepts.map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
+            </select>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortOption)}
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clemson-orange bg-white"
+            >
+              <option value="course">Sort: Course #</option>
+              <option value="gpa-desc">Sort: GPA (high → low)</option>
+              <option value="gpa-asc">Sort: GPA (low → high)</option>
+              <option value="a-pct-desc">Sort: Most A's</option>
+            </select>
+          </div>
         </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+      </div>
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+      {/* Results */}
+      <main className="max-w-3xl mx-auto px-4 py-4">
+        {!hasSearch ? (
+          <div className="text-center py-16 text-gray-400">
+            <div className="text-4xl mb-3">🎓</div>
+            <p className="text-lg font-medium text-gray-500">
+              Search for a course to get started
+            </p>
+            <p className="text-sm mt-1">
+              Try searching for a course number, department, or instructor name
+            </p>
+          </div>
+        ) : groups.length === 0 ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-lg font-medium text-gray-500">No courses found</p>
+            <p className="text-sm mt-1">Try a different search term or department</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-xs text-gray-400 mb-3">
+              {groups.length} course{groups.length !== 1 ? 's' : ''} —{' '}
+              {groups.reduce((sum, g) => sum + g.sections.length, 0)} sections
+            </p>
+            <div className="flex flex-col gap-2">
+              {groups.map((group) => (
+                <CourseGroup
+                  key={`${group.dept}-${group.number}`}
+                  group={group}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </main>
+    </div>
+  );
 }
-
-export default App
