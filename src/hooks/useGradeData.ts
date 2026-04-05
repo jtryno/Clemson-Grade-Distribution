@@ -1,8 +1,25 @@
-import { useMemo } from 'react';
-import rawData from '../data/202508.json';
+import { useEffect, useMemo, useState } from 'react';
 import type { Course, CourseGroup, GradeData } from '../types';
 
-const data = rawData as unknown as GradeData;
+export const TERMS = [
+  { term: '202508', label: 'Fall 2025' },
+  { term: '202501', label: 'Spring 2025' },
+  { term: '202408', label: 'Fall 2024' },
+  { term: '202401', label: 'Spring 2024' },
+  { term: '202308', label: 'Fall 2023' },
+  { term: '202301', label: 'Spring 2023' },
+  { term: '202208', label: 'Fall 2022' },
+  { term: '202201', label: 'Spring 2022' },
+] as const;
+
+export type Term = (typeof TERMS)[number]['term'];
+
+/** Converts "Last, First Middle" → "first last" for search matching. */
+function instructorSearchString(instructor: string): string {
+  const [last, rest] = instructor.split(',').map((s) => s.trim());
+  const first = rest?.split(' ')[0];
+  return first ? `${first} ${last}`.toLowerCase() : last.toLowerCase();
+}
 
 function groupCourses(courses: Course[]): CourseGroup[] {
   const map = new Map<string, CourseGroup>();
@@ -34,22 +51,31 @@ function groupCourses(courses: Course[]): CourseGroup[] {
   return Array.from(map.values());
 }
 
-/** Converts "Last, First Middle" → "first last" for search matching. */
-function instructorSearchString(instructor: string): string {
-  const [last, rest] = instructor.split(',').map((s) => s.trim());
-  const first = rest?.split(' ')[0];
-  return first ? `${first} ${last}`.toLowerCase() : last.toLowerCase();
-}
-
 export type SortOption = 'course' | 'gpa-desc' | 'gpa-asc' | 'a-pct-desc';
 
-export function useGradeData(query: string, dept: string, sort: SortOption) {
+export function useGradeData(
+  query: string,
+  dept: string,
+  sort: SortOption,
+  term: Term,
+) {
+  const [data, setData] = useState<GradeData | null>(null);
+
+  useEffect(() => {
+    setData(null);
+    import(`../data/${term}.json`).then((mod) => {
+      setData(mod.default as unknown as GradeData);
+    });
+  }, [term]);
+
   const allDepts = useMemo(
-    () => Array.from(new Set(data.courses.map((c) => c.dept))).sort(),
-    [],
+    () => (data ? Array.from(new Set(data.courses.map((c) => c.dept))).sort() : []),
+    [data],
   );
 
   const groups = useMemo(() => {
+    if (!data) return [];
+
     const q = query.toLowerCase().trim();
 
     if (!q && !dept) return [];
@@ -93,7 +119,7 @@ export function useGradeData(query: string, dept: string, sort: SortOption) {
     }
 
     return grouped;
-  }, [query, dept, sort]);
+  }, [data, query, dept, sort]);
 
-  return { groups, allDepts, label: data.label };
+  return { groups, allDepts, label: data?.label ?? '...', loading: data === null };
 }

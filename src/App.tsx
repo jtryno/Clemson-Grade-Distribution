@@ -1,15 +1,21 @@
 import { useState } from 'react';
-import { useGradeData, type SortOption } from './hooks/useGradeData';
+import { useGradeData, TERMS, type SortOption, type Term } from './hooks/useGradeData';
 import { CourseGroup } from './components/CourseGroup';
 
 export default function App() {
   const [query, setQuery] = useState('');
   const [dept, setDept] = useState('');
   const [sort, setSort] = useState<SortOption>('course');
+  const [term, setTerm] = useState<Term>('202508');
 
-  const { groups, allDepts, label } = useGradeData(query, dept, sort);
+  const { groups, allDepts, label, loading } = useGradeData(query, dept, sort, term);
 
   const hasSearch = query.trim() !== '' || dept !== '';
+
+  function handleTermChange(newTerm: Term) {
+    setTerm(newTerm);
+    setDept(''); // reset dept since departments may differ across semesters
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -34,6 +40,17 @@ export default function App() {
             className="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-clemson-orange focus:border-transparent"
           />
           <div className="flex gap-2">
+            <select
+              value={term}
+              onChange={(e) => handleTermChange(e.target.value as Term)}
+              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-clemson-orange bg-white"
+            >
+              {TERMS.map((t) => (
+                <option key={t.term} value={t.term}>
+                  {t.label}
+                </option>
+              ))}
+            </select>
             <select
               value={dept}
               onChange={(e) => setDept(e.target.value)}
@@ -62,7 +79,11 @@ export default function App() {
 
       {/* Results */}
       <main className="max-w-3xl mx-auto px-4 py-4">
-        {!hasSearch ? (
+        {loading ? (
+          <div className="text-center py-16 text-gray-400">
+            <p className="text-sm">Loading...</p>
+          </div>
+        ) : !hasSearch ? (
           <div className="text-center py-16 text-gray-400">
             <p className="text-lg font-medium text-gray-500">
               Search for a course to get started
