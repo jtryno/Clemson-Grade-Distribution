@@ -1,36 +1,41 @@
 # Clemson Grade Distribution
 
-Tired of downloading a 137-page PDF just to see how hard a class is? This app makes Clemson's grade distribution data actually usable. Search for any course, see the grade breakdown, and compare instructors before you register.
+Clemson publishes grade distributions every semester as a 137-page PDF that nobody wants to read. This turns it into an actual searchable app so you can figure out which section to take before registration opens.
 
-## What it does
+Live site: https://jtryno.github.io/Clemson-Grade-Distribution/
 
-- Search courses by name, number, or instructor
+## Features
+
+- Search by course number, name, or professor
 - Filter by department
-- Visual grade distribution charts
-- Estimated GPA per section
-- Compare all sections of a course side by side
-- Honors section labels
+- Grade breakdown bar + chart per section
+- Estimated GPA for each section
+- See all sections of a course at once to compare professors
+- Rate My Professors links for each instructor
+- Honors section badges
 
-## Running locally
+## Running it locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Regenerating the data
+## Re-parsing the data
 
-The grade data comes from Clemson's official grade distribution PDFs. If you want to re-parse or add a new semester:
+The JSON data is generated from Clemson's official grade distribution PDFs. To regenerate or add a new semester:
 
 ```bash
 pip install pdfplumber
 python scripts/parse_pdf.py
 ```
 
+Output goes to `src/data/202508.json`.
+
 ## Stack
 
-React, TypeScript, Tailwind CSS, Recharts
+React + TypeScript, Vite, Tailwind CSS, Recharts
 
 ---
 
-*Data sourced from Clemson University's publicly available grade distribution reports.*
+*Data from Clemson University's publicly available grade distribution reports.*
