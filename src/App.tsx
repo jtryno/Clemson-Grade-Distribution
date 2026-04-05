@@ -64,7 +64,6 @@ export default function App() {
       <main className="max-w-3xl mx-auto px-4 py-4">
         {!hasSearch ? (
           <div className="text-center py-16 text-gray-400">
-            <div className="text-4xl mb-3">🎓</div>
             <p className="text-lg font-medium text-gray-500">
               Search for a course to get started
             </p>

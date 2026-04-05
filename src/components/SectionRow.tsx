@@ -36,9 +36,17 @@ export function SectionRow({ course }: Props) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="text-sm text-blue-600 hover:underline flex-1 min-w-0 truncate"
+              className="group flex items-center gap-1.5 flex-1 min-w-0"
             >
-              {course.instructor}
+              <span className="text-sm text-gray-800 group-hover:text-blue-600 transition-colors truncate">
+                {course.instructor}
+              </span>
+              <span
+                title="View on Rate My Professors"
+                className="shrink-0 text-xs font-semibold px-1.5 py-0.5 rounded bg-orange-100 text-orange-700 group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors"
+              >
+                RMP ↗
+              </span>
             </a>
           ) : (
             <span className="text-sm text-gray-400 flex-1">Instructor TBA</span>
