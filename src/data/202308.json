@@ -48804,6 +48804,26 @@
     },
     {
       "dept": "ME",
+      "number": "8930",
+      "section": "005",
+      "title": "Sel Topics: Conv. Opt.",
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "F": 0,
+        "P": 0,
+        "FP": 0,
+        "W": 0,
+        "I": 0
+      },
+      "instructor": "Mohammadpour Velni, Javad",
+      "honors": false,
+      "gpa": null
+    },
+    {
+      "dept": "ME",
       "number": "9910",
       "section": "009",
       "title": "Doctoral Dissertation Research",
