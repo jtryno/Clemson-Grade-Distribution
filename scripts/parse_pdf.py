@@ -43,6 +43,7 @@ GRADE_LINE = re.compile(
     r"(\d+)%\s+"              # F(P)
     r"(\d+)%\s+"              # W
     r"(\d+)%\s+"              # I
+    r"(?:\d+%\s+){0,3}"      # optional SCP SCN SCD columns (present in 2022-2024 PDFs)
     r"(.+?)$"                 # instructor name (rest of line)
 )
 
@@ -96,6 +97,7 @@ def parse_pdf(pdf_path: Path) -> list[dict]:
                         pending_record = None
                     continue
 
+                line = re.sub(r'#+', ' 0%', line)  # fix PDF overflow artifacts like 0%#### → 0% 0%
                 m = GRADE_LINE.match(line)
                 if m:
                     # Flush previous record

@@ -60478,9 +60478,29 @@
         "W": 0,
         "I": 0
       },
-      "instructor": "Jones, Michael David POST 8430 001 Org Theory & Pub Mgt 0% 0% 0% 0% 0% 0% 0% 0%#### Turner, Brandon P",
+      "instructor": "Jones, Michael David",
       "honors": false,
       "gpa": 3.75
+    },
+    {
+      "dept": "POST",
+      "number": "8430",
+      "section": "001",
+      "title": "Org Theory & Pub Mgt",
+      "grades": {
+        "A": 0,
+        "B": 0,
+        "C": 0,
+        "D": 0,
+        "F": 0,
+        "P": 0,
+        "FP": 0,
+        "W": 0,
+        "I": 0
+      },
+      "instructor": "Turner, Brandon P",
+      "honors": false,
+      "gpa": null
     },
     {
       "dept": "POST",
