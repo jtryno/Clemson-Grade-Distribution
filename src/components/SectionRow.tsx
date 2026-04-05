@@ -4,6 +4,14 @@ import { gpaColor, formatGpa } from '../utils/gpa';
 import { GradeBar } from './GradeBar';
 import { GradeChart } from './GradeChart';
 
+/** Converts "Last, First Middle" → RMP search URL using only first and last name. */
+function rmpUrl(instructor: string): string {
+  const [last, rest] = instructor.split(',').map((s) => s.trim());
+  const first = rest?.split(' ')[0];
+  const name = first ? `${first} ${last}` : last;
+  return `https://www.ratemyprofessors.com/search/professors/242?q=${encodeURIComponent(name)}`;
+}
+
 interface Props {
   course: Course;
 }
@@ -22,9 +30,19 @@ export function SectionRow({ course }: Props) {
             §{course.section}
           </span>
 
-          <span className="text-sm text-gray-800 flex-1 min-w-0 truncate">
-            {course.instructor || 'Instructor TBA'}
-          </span>
+          {course.instructor ? (
+            <a
+              href={rmpUrl(course.instructor)}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-sm text-blue-600 hover:underline flex-1 min-w-0 truncate"
+            >
+              {course.instructor}
+            </a>
+          ) : (
+            <span className="text-sm text-gray-400 flex-1">Instructor TBA</span>
+          )}
 
           {course.honors && (
             <span className="text-xs font-semibold px-1.5 py-0.5 rounded bg-clemson-purple text-white shrink-0">
