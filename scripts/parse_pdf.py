@@ -2,10 +2,8 @@
 parse_pdf.py — Extract Clemson grade distribution data from PDF to JSON.
 
 Usage:
-    python scripts/parse_pdf.py
-
-Reads:  distribution-data/<term>.pdf
-Writes: src/data/<term>.json
+    python scripts/parse_pdf.py           # parse all PDFs in distribution-data/
+    python scripts/parse_pdf.py 202508    # parse a single term
 """
 
 import json
@@ -15,10 +13,19 @@ from pathlib import Path
 
 import pdfplumber
 
-TERM = "202508"
-TERM_LABEL = "Fall 2025"
-PDF_PATH = Path("distribution-data") / f"{TERM}.pdf"
-OUT_PATH = Path("src/data") / f"{TERM}.json"
+TERM_LABELS: dict[str, str] = {
+    "202201": "Spring 2022",
+    "202208": "Fall 2022",
+    "202301": "Spring 2023",
+    "202308": "Fall 2023",
+    "202401": "Spring 2024",
+    "202408": "Fall 2024",
+    "202501": "Spring 2025",
+    "202508": "Fall 2025",
+}
+
+PDF_DIR = Path("distribution-data")
+OUT_DIR = Path("src/data")
 
 # Matches a grade data line:
 # DEPT  COURSENUM  SECTION  Title words...  A% B% C% D% F% P% F(P)% W% I%  Instructor [H]
@@ -139,29 +146,42 @@ def parse_pdf(pdf_path: Path) -> list[dict]:
     return courses
 
 
+def process_term(term: str) -> None:
+    label = TERM_LABELS.get(term, term)
+    pdf_path = PDF_DIR / f"{term}.pdf"
+    out_path = OUT_DIR / f"{term}.json"
+
+    if not pdf_path.exists():
+        print(f"  SKIP: {pdf_path} not found", file=sys.stderr)
+        return
+
+    print(f"Parsing {pdf_path} ({label}) ...")
+    courses = parse_pdf(pdf_path)
+    print(f"  {len(courses)} sections, {len({c['dept'] for c in courses})} departments")
+
+    output = {"term": term, "label": label, "courses": courses}
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(output, indent=2), encoding="utf-8")
+    print(f"  Written to {out_path}")
+
+
 def main() -> None:
-    if not PDF_PATH.exists():
-        print(f"ERROR: {PDF_PATH} not found. Run from the repo root.", file=sys.stderr)
+    if len(sys.argv) == 2:
+        terms = [sys.argv[1]]
+    else:
+        # Parse all known terms that have a PDF
+        terms = [t for t in TERM_LABELS if (PDF_DIR / f"{t}.pdf").exists()]
+        terms.sort()
+
+    if not terms:
+        print("No PDFs found in distribution-data/", file=sys.stderr)
         sys.exit(1)
 
-    print(f"Parsing {PDF_PATH} ...")
-    courses = parse_pdf(PDF_PATH)
-    print(f"  Parsed {len(courses)} course sections")
+    for term in terms:
+        process_term(term)
 
-    output = {
-        "term":    TERM,
-        "label":   TERM_LABEL,
-        "courses": courses,
-    }
-
-    OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUT_PATH.write_text(json.dumps(output, indent=2), encoding="utf-8")
-    print(f"  Written to {OUT_PATH}")
-
-    # Sanity check
-    depts = {c["dept"] for c in courses}
-    print(f"  Departments: {len(depts)}")
-    print(f"  Sample: {courses[0]}")
+    print(f"\nDone — processed {len(terms)} term(s).")
 
 
 if __name__ == "__main__":
