@@ -34,6 +34,13 @@ function groupCourses(courses: Course[]): CourseGroup[] {
   return Array.from(map.values());
 }
 
+/** Converts "Last, First Middle" → "first last" for search matching. */
+function instructorSearchString(instructor: string): string {
+  const [last, rest] = instructor.split(',').map((s) => s.trim());
+  const first = rest?.split(' ')[0];
+  return first ? `${first} ${last}`.toLowerCase() : last.toLowerCase();
+}
+
 export type SortOption = 'course' | 'gpa-desc' | 'gpa-asc' | 'a-pct-desc';
 
 export function useGradeData(query: string, dept: string, sort: SortOption) {
@@ -58,7 +65,8 @@ export function useGradeData(query: string, dept: string, sort: SortOption) {
         (c) =>
           `${c.dept} ${c.number}`.toLowerCase().includes(q) ||
           c.title.toLowerCase().includes(q) ||
-          c.instructor.toLowerCase().includes(q),
+          c.instructor.toLowerCase().includes(q) ||
+          instructorSearchString(c.instructor).includes(q),
       );
     }
 
